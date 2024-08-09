@@ -41,7 +41,6 @@ const anecdoteSlice = createSlice({
       : action.payload
       const anecdotes = current(state)
       const anecdoteToVote = anecdotes.find((n) => n.id === id);
-      console.log(anecdoteToVote);
       const changedVote = {
         ...anecdoteToVote,
         votes: Number(anecdoteToVote["votes"] + 1)
