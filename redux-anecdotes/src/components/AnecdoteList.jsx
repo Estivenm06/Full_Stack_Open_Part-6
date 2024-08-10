@@ -1,6 +1,6 @@
-import { voteOf } from "../reducers/anecdoteReducer";
-import { NEW_NOTIFICATION, HIDE_NOTIFICATION } from '../reducers/notificationReducer';
+import { setNotification } from "../reducers/notificationReducer";
 import { useSelector, useDispatch } from "react-redux";
+import { VoteOfAnecdote } from "../reducers/anecdoteReducer";
 
 const AnecdoteList = () => {
   const dispatch = useDispatch();
@@ -13,13 +13,15 @@ const AnecdoteList = () => {
         )
       : anecdotes;
 
-  const vote = (id) => {
-    const anecdote = anecdotes.filter(n => n.id === id)
-    dispatch(voteOf({payload: id}));
-    dispatch(NEW_NOTIFICATION({ payload: `You voted ${anecdote["0"].content}`}))
-    setTimeout(() => {
-     dispatch(HIDE_NOTIFICATION())
-    }, 1500);
+  const vote = async (id) => {
+    const anecdote = anecdotes.find((n) => n.id === id);
+    dispatch(
+      VoteOfAnecdote(id, {
+        content: anecdote.content,
+        votes: anecdote.votes + 1,
+      })
+    );
+    dispatch(setNotification(`You voted '${anecdote.content}'`, 5000))
   };
 
   const anecdoteSorted = [...anecdotesToShow].sort((a, b) => {
