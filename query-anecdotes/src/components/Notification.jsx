@@ -11,7 +11,7 @@ const Notification = () => {
   }
   
   if (notification === null){
-    return null
+    return;
   } 
 
   return (
