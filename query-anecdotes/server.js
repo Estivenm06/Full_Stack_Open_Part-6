@@ -1,15 +1,7 @@
 import jsonServer from "json-server";
-import path from "path";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const dbPath = path.join(__dirname, ".public/db.json");
 
 const server = jsonServer.create();
-const router = jsonServer.router(dbPath);
+const router = jsonServer.router("db.json");
 const middlewares = jsonServer.defaults();
 
 const validator = (request, response, next) => {
