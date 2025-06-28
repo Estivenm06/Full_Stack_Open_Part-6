@@ -33,6 +33,15 @@ const Notification = () => {
 
   const style = context.type === "success" ? styleSucess : styleError;
 
+  const alreadySuccess = document.querySelector("green");
+  const alreadyError = document.querySelector("red");
+  if (alreadySuccess) {
+    alreadySuccess.remove();
+  }
+  if (alreadyError) {
+    alreadyError.remove();
+  }
+
   return <span style={style}>{context.message}</span>;
 };
 

@@ -1,26 +1,20 @@
+import fs from "fs";
 import path from "path";
-import fs from "fs/promises";
 
-import { fileURLToPath } from "url";
-import { dirname } from "path";
+const tmpDbPath = path.join("tmp", "db.json");
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const dbPath = path.join(__dirname, "../dist/db.json");
-
-const anecdotes = async (req, res) => {
+const anecdotesHandler = (req, res) => {
   if (req.method === "GET") {
     try {
-      const dbData = await fs.readFile(dbPath, "utf-8");
-      const dataParsed = JSON.parse(dbData);
-      res.status(200).send(dataParsed.anecdotes);
+      const data = fs.readFileSync(tmpDbPath, "utf-8");
+      const anecdotes = JSON.parse(data);
+      res.status(200).json(anecdotes);
     } catch (error) {
-      res.send({ error: "Error trying to fetch database." });
+      res.status(500).json({ error: "Failed to read anecdotes." });
     }
   } else if (req.method === "POST") {
     try {
-      const { content, votes } = req.body;
+      const { content, votes = 0 } = req.body;
 
       if (!content || content.length < 5) {
         return res.status(400).json({
@@ -28,51 +22,55 @@ const anecdotes = async (req, res) => {
         });
       }
 
-      const dbData = await fs.readFile(dbPath, "utf-8");
-      const dataParsed = JSON.parse(dbData);
-      const alreadyExists = dataParsed.anecdotes.find(
-        (anecdote) => anecdote.content === content
-      );
-      if (alreadyExists) {
-        res.status(401).send({ error: "This anecdote already exists" });
-        return;
+      const data = fs.readFileSync(tmpDbPath, "utf-8");
+      const anecdotes = JSON.parse(data);
+      const alreadyExists = anecdotes.anecdotes.find(anecdote => anecdote.content === content)
+      
+      if(alreadyExists) {
+        return res.status(401).send({error: 'This anecdote already exists.'})
       }
-      const newAnecote = { id: Date.now(), content, votes };
-      dataParsed.anecdotes.push(newAnecote);
-      await fs.writeFile(dbPath, JSON.stringify(dataParsed, null, 2));
 
-      res.status(201).send(newAnecote);
+      const newAnecdote = {
+        id: Date.now().toString(),
+        content,
+        votes
+      };
+
+      anecdotes.anecdotes.push(newAnecdote);
+      fs.writeFileSync(tmpDbPath, JSON.stringify(anecdotes, null, 2));
+
+      res.status(201).json(newAnecdote);
     } catch (error) {
-      res.send({ error: "Error trying to create anecdote." });
+      res.status(500).json({ error: "Failed to save anecdote." });
     }
   } else if (req.method === "PUT") {
     try {
-      const { content, id, votes } = req.body;
+      const { id, content, votes } = req.body;
 
       if (!content || content.length < 5) {
         return res.status(400).json({
           error: "too short anecdote, must have length 5 or more",
         });
       }
-      const dbData = await fs.readFile(dbPath, "utf-8");
-      const dataParsed = JSON.parse(dbData);
-      const index = dataParsed.anecdotes.findIndex(
-        (anecdote) => anecdote.id === id
-      );
 
-      if (index === -1) {
+      const data = fs.readFileSync(tmpDbPath, "utf-8");
+      const anecdotes = JSON.parse(data);
+
+      const anecdoteIndex = anecdotes.anecdotes.findIndex((a) => a.id === id);
+      if (anecdoteIndex === -1) {
         return res.status(404).json({ error: "Anecdote not found" });
       }
-      dataParsed.anecdotes[index] = { id, content, votes };
-      await fs.writeFile(dbPath, JSON.stringify(dataParsed, null, 2));
 
-      res.send(dataParsed.anecdotes[index]);
+      anecdotes.anecdotes[anecdoteIndex] = { id, content, votes };
+      fs.writeFileSync(tmpDbPath, JSON.stringify(anecdotes, null, 2));
+
+      res.status(200).json(anecdotes.anecdotes[anecdoteIndex]);
     } catch (error) {
-      res.send({ error: "Error trying to update anecdote." });
+      res.status(500).json({ error: "Failed to update anecdote." });
     }
   } else {
-    res.status(500).json({ error: "unknown method" });
+    res.status(405).json({ error: "Method not allowed" });
   }
 };
 
-export default anecdotes;
+export default anecdotesHandler;
