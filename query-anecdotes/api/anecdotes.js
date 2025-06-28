@@ -7,7 +7,7 @@ import { dirname } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const dbPath = path.join(__dirname, "db.json");
+const dbPath = path.join(__dirname, "../dist/db.json");
 
 const anecdotes = async (req, res) => {
   if (req.method === "GET") {
@@ -34,7 +34,6 @@ const anecdotes = async (req, res) => {
         (anecdote) => anecdote.content === content
       );
       if (alreadyExists) {
-        
         res.status(401).send({ error: "This anecdote already exists" });
         return;
       }
