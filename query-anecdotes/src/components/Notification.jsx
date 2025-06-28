@@ -1,24 +1,39 @@
-import { useContext } from "react"
-import anecdoteContext from "./anecdoteContext"
+import { useAnecdoteContext } from "../hooks/useAnecdoteContext";
 
 const Notification = () => {
-  const [notification, dispatch] = useContext(anecdoteContext, null)
-  const style = {
-    border: 'solid',
+  const { context } = useAnecdoteContext();
+
+  if (!context) {
+    return;
+  }
+
+  const styleSucess = {
+    border: "solid",
     padding: 10,
     borderWidth: 1,
-    marginBottom: 5
-  }
-  
-  if (notification === null){
-    return;
-  } 
+    marginBottom: 5,
+    backgroundColor: "green",
+    borderColor: "green",
+    borderRadius: "0.5em",
+    color: "white",
+    fontWeight: "bold",
+  };
 
-  return (
-    <div style={style}>
-      {notification}
-    </div>
-  )
-}
+  const styleError = {
+    border: "solid",
+    padding: 15,
+    borderWidth: 1,
+    marginBottom: 5,
+    backgroundColor: "red",
+    borderColor: "red",
+    borderRadius: "0.5em",
+    color: "white",
+    fontWeight: "bold",
+  };
 
-export default Notification
+  const style = context.type === "success" ? styleSucess : styleError;
+
+  return <span style={style}>{context.message}</span>;
+};
+
+export default Notification;

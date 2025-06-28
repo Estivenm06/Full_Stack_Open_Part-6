@@ -1,59 +1,45 @@
 import AnecdoteForm from "./components/AnecdoteForm";
 import Notification from "./components/Notification";
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { getAll, updateAnecdote } from "./services/requests";
-import anecdoteContext from "./components/anecdoteContext";
-import { useContext } from "react";
+import { useAnecdote } from "./hooks/useAnecdote";
+import { useAnecdoteContext } from "./hooks/useAnecdoteContext";
+import { useUpdateAnecdote } from "./hooks/useUpdateAnecdote";
 
 const App = () => {
-  const queryClient = useQueryClient();
-  const { data, error, isError, isLoading } = useQuery({
-    queryKey: ["anecdotes"],
-    queryFn: getAll,
-    retry: 1,
-  });
-  
-  const anecdotes = data
+  const { contextDispatch } = useAnecdoteContext();
+  const { data, isLoading } = useAnecdote();
+  const { mutate } = useUpdateAnecdote();
 
-  const [anecdote, dispatch] = useContext(anecdoteContext, 0)
- 
   const handleVote = (anecdote) => {
-    dispatch({ type: "VOTE", payload: anecdote });
-    setTimeout(() => {
-      dispatch({type: "VOTE", payload: null})
-    }, 5000)
-    updatedMutation.mutate({ ...anecdote, votes: anecdote.votes + 1 });
+    contextDispatch({ type: "VOTE", payload: anecdote });
+    mutate({ ...anecdote, votes: anecdote.votes + 1 });
   };
-
-  const updatedMutation = useMutation({
-    mutationFn: updateAnecdote,
-    onSuccess: () => {
-      queryClient.invalidateQueries(["anecdotes"]);
-    },
-  });
 
   if (isLoading) {
     return <span>Loading data...</span>;
   }
 
-  if (isError) {
-    return <span>Error: {error.message}</span>;
-  }
-
   return (
     <>
-      <h3>Anecdote app</h3>
-      <Notification />
-      <AnecdoteForm />
-        {anecdotes.map((anecdote) => (
-          <div key={anecdote.id}>
-            <div>{anecdote.content}</div>
-            <div>
-              has {anecdote.votes}
-              <button onClick={() => handleVote(anecdote)}>vote</button>
-            </div>
-          </div>
-        ))}
+      <header>
+        <h1>Anecdote app</h1>
+        <Notification />
+      </header>
+      <main>
+        <article>
+          <AnecdoteForm />
+        </article>
+        <article>
+          {data.map((anecdote) => (
+            <ul key={anecdote.id}>
+              <li>
+                <p>{anecdote.content}</p>
+                <span>has {anecdote.votes}</span>
+                <button onClick={() => handleVote(anecdote)}>vote</button>
+              </li>
+            </ul>
+          ))}
+        </article>
+      </main>
     </>
   );
 };

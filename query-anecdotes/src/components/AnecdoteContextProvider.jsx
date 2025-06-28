@@ -1,6 +1,7 @@
 import { useReducer } from "react";
+
 import { anecdoteReducer } from "./AnecdoteReducer";
-import anecdoteContext from "./anecdoteContext";
+import anecdoteContext from "../utils/anecdoteContext";
 
 export const AnecdoteContextProvider = ({ children }) => {
   const [anecdote, anecdoteDispatch] = useReducer(anecdoteReducer, null);
