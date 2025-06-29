@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
-import anecdotesService from '../services/anecdotes'
-const { getAll, updateAnecdote, createNew } = anecdotesService;
+import { getAll, create, update } from "../services/requests";
+import { setNotification } from "./notificationReducer";
 
 const anecdotesAtStart = [
   "If it hurts, do it more often",
@@ -28,40 +28,58 @@ const anecdoteSlice = createSlice({
   initialState,
   reducers: {
     voteOf(state, action) {
-      const { id } = action.payload
-      return state.map(anecdote => 
-        anecdote.id === id ? {...anecdote, votes: anecdote.votes + 1} : anecdote
-      )
+      const { id } = action.payload;
+      return state.map((anecdote) =>
+        anecdote.id === id
+          ? { ...anecdote, votes: anecdote.votes + 1 }
+          : anecdote
+      );
     },
-    appendAnecdote(state, action){
-      state.push(action.payload)
+    appendAnecdote(state, action) {
+      state.push(action.payload);
     },
-    setAnecdote(state, action){
-      return action.payload
-    }
+    setAnecdote(state, action) {
+      return action.payload;
+    },
   },
 });
 
 export const initializeAnecdotes = () => {
-  return async dispatch => {
-    const anecdotes = await getAll()
-    dispatch(setAnecdote(anecdotes))
-  }
-}
+  return async (dispatch) => {
+    const anecdotes = await getAll();
+    dispatch(setAnecdote(anecdotes));
+  };
+};
 
-export const createAnecdote = (content) => {
-  return async dispatch => {
-    const newAnecdote = await createNew(content)
-    dispatch(appendAnecdote(newAnecdote))
-  }
-}
+export const createAnecdote = (anecdoteToCreate) => {
+  return async (dispatch) => {
+    await create(anecdoteToCreate)
+      .then((response) => {
+        dispatch(appendAnecdote(response));
+        dispatch(
+          setNotification(
+            { message: `You created '${response.content}'`, type: "success" },
+            5000
+          )
+        );
+      })
+      .catch((error) => {
+        dispatch(
+          setNotification(
+            { message: error.response.data.error, type: "error" },
+            5000
+          )
+        );
+      });
+  };
+};
 
-export const VoteOfAnecdote = (id, content) => {
-  return async dispach => {
-    const update = await updateAnecdote(id, content)
-    dispach(voteOf(update))
-  }
-}
+export const VoteOfAnecdote = (anecdoteToVote) => {
+  return async (dispach) => {
+    const anecdoteUpdated = await update(anecdoteToVote);
+    dispach(voteOf(anecdoteUpdated));
+  };
+};
 
-export const { voteOf, appendAnecdote, setAnecdote } = anecdoteSlice.actions
-export default anecdoteSlice.reducer
+export const { voteOf, appendAnecdote, setAnecdote } = anecdoteSlice.actions;
+export default anecdoteSlice.reducer;

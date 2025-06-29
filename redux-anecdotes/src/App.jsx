@@ -1,26 +1,35 @@
-import AnecdoteForm from './components/AnecdoteForm.jsx'
-import AnecdoteList from './components/AnecdoteList.jsx'
-import Filter from './components/Filter.jsx'
-import Notification from './components/Notification.jsx'
-import { useEffect } from 'react'
-import { useDispatch } from 'react-redux'
-import { initializeAnecdotes } from './reducers/anecdoteReducer.js'
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+
+import { AnecdoteForm } from "./components/AnecdoteForm.jsx";
+import { AnecdoteList } from "./components/AnecdoteList.jsx";
+import { Filter } from "./components/Filter.jsx";
+import { Notification } from "./components/Notification.jsx";
+import { initializeAnecdotes } from "./reducers/anecdoteReducer.js";
 
 const App = () => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(initializeAnecdotes())
-  }, [dispatch])
+    dispatch(initializeAnecdotes());
+  }, [dispatch]);
 
   return (
-    <div>
-      <h2>Anecdotes</h2>
-        <Notification/>
+    <>
+      <header>
+        <h1>Anecdote app</h1>
+        <Notification />
         <Filter />
-        <AnecdoteList />
-        <AnecdoteForm />
-    </div>
-  )
-}
+      </header>
+      <main>
+        <article>
+          <AnecdoteForm />
+        </article>
+        <article>
+          <AnecdoteList />
+        </article>
+      </main>
+    </>
+  );
+};
 
-export default App
+export default App;

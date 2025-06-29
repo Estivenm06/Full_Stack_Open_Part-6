@@ -4,8 +4,21 @@ import { VoteOfAnecdote } from "../reducers/anecdoteReducer";
 
 const AnecdoteList = () => {
   const dispatch = useDispatch();
-  const anecdotes = useSelector((state) => state.anecdotes);
-  const filter = useSelector((state) => state.filter);
+  const anecdotes = useSelector(({anecdotes}) => anecdotes);
+  const filter = useSelector(({filter}) => filter);
+
+  const handleVote = async (id) => {
+    const anecdote = anecdotes.find((anecdote) => anecdote.id === id);    
+    dispatch(
+      VoteOfAnecdote({
+        id: anecdote.id,
+        content: anecdote.content,
+        votes: anecdote.votes + 1,
+      })
+    );
+    dispatch(setNotification({message: `You voted '${anecdote.content}'`, type: 'success'}, 5000));
+  };
+  
   const anecdotesToShow =
     filter !== null
       ? anecdotes.filter((anecdote) =>
@@ -13,34 +26,23 @@ const AnecdoteList = () => {
         )
       : anecdotes;
 
-  const vote = async (id) => {
-    const anecdote = anecdotes.find((n) => n.id === id);
-    dispatch(
-      VoteOfAnecdote(id, {
-        content: anecdote.content,
-        votes: anecdote.votes + 1,
-      })
-    );
-    dispatch(setNotification(`You voted '${anecdote.content}'`, 5000))
-  };
-
   const anecdoteSorted = [...anecdotesToShow].sort((a, b) => {
     return b.votes - a.votes;
   });
 
   return (
-    <div>
-      {anecdoteSorted.map((anecdote, id) => (
-        <div key={id}>
-          <div>{anecdote.content}</div>
-          <div>
-            has {anecdote.votes}
-            <button onClick={() => vote(anecdote.id)}>vote</button>
-          </div>
-        </div>
+    <>
+      {anecdoteSorted.map(({id, content, votes}) => (
+        <ul key={id}>
+          <li>
+            <p>{content}</p>
+            <span>has {votes}</span>
+            <button onClick={() => handleVote(id)}>vote</button>
+          </li>
+        </ul>
       ))}
-    </div>
+    </>
   );
 };
 
-export default AnecdoteList;
+export { AnecdoteList };

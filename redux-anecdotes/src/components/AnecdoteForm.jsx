@@ -1,28 +1,44 @@
-import { createAnecdote } from "../reducers/anecdoteReducer";
 import { useDispatch } from "react-redux";
+
+import { createAnecdote } from "../reducers/anecdoteReducer";
 import { setNotification } from "../reducers/notificationReducer";
 
 const AnecdoteForm = () => {
   const dispatch = useDispatch();
   const addAnecdote = (event) => {
     event.preventDefault();
+    if (event.target.anecdote.value.trim() === "") {
+      dispatch(
+        setNotification(
+          { message: "This field cannot be empty.", type: "error" },
+          5000
+        )
+      );
+      return;
+    }
+    if (event.target.anecdote.value.length < 5) {
+      dispatch(
+        setNotification(
+          { message: "Anecdote at least 5 length.", type: "error" },
+          5000
+        )
+      );
+      return;
+    }
     const content = event.target.anecdote.value;
-    event.target.anecdote.value = "";
     dispatch(createAnecdote(content));
-    dispatch(setNotification(`You created '${content}'`, 5000))
+    event.target.anecdote.value = "";
   };
 
   return (
-    <div>
-      <h2>create new</h2>
+    <>
+      <h3>create new</h3>
       <form onSubmit={addAnecdote}>
-        <div>
-          <input type="text" name="anecdote" />
-        </div>
+        <input name="anecdote" />
         <button type="submit">create</button>
       </form>
-    </div>
+    </>
   );
 };
 
-export default AnecdoteForm;
+export { AnecdoteForm };
