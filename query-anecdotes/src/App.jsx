@@ -29,7 +29,7 @@ const App = () => {
           <AnecdoteForm />
         </article>
         <article>
-          {data.anecdotes.map((anecdote) => (
+          {data.map((anecdote) => (
             <ul key={anecdote.id}>
               <li>
                 <p>{anecdote.content}</p>

@@ -4,16 +4,19 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "vite:dev": "vite",
+    "preview": "vite preview",
     "server:dev": "nodemon server.js",
+    "server": "node server.js",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
-    "server": "node server.js"
+    "dev": "concurrently \"npm run vite:dev\" \"npm run server:dev\"",
+    "start": "concurrently \"npm run preview\" \"npm run server\""
   },
   "dependencies": {
     "@tanstack/react-query": "^5.51.23",
     "axios": "^1.7.3",
+    "concurrently": "^9.2.0",
     "json-server": "^0.17.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
